@@ -1,122 +1,78 @@
-# NutriGuard 🍽️📱
+# NutriGuard 🍽️💡
 
-**NutriGuard** is a mobile application built with **React Native (Expo)** that empowers users to make informed dietary decisions by scanning packaged food barcodes and retrieving **detailed nutrition information**. Designed for health-conscious individuals, the app provides real-time insights into calorie, sugar, sodium, and fat content — along with customizable warning settings.
+**NutriGuard** is an AI-powered mobile application built using **React Native (Expo)**, designed to help users make smarter food choices based on their personal health goals — whether it's **weight loss**, **weight gain**, or maintaining a balanced lifestyle.
+
+The app allows users to **scan packaged food barcodes**, fetch real-time nutritional data using the **Open Food Facts API**, and receive **personalized guidance** from an integrated AI system. By entering their health profile (e.g., age, weight, height, dietary preferences), users receive **customized food intake recommendations**, warnings, and smart alternatives based on their goals.
 
 ---
 
-## 🧠 Purpose & Goals
+## 🧠 Purpose & Vision
 
 **Purpose**:  
-To provide an intuitive, efficient tool for scanning barcodes and viewing nutrition facts, with alerts for high sugar or sodium based on user preferences.
+To become a personalized nutrition assistant that helps users eat intentionally and make food choices aligned with their fitness goals.
 
-**Goals**:
-- Deliver accurate, serving-size-normalized nutrition data.
-- Offer a customizable experience with persistent user settings.
-- Ensure responsive, accessible design for all devices.
-- Prepare for eventual release on Google Play and Apple App Store.
+**What sets NutriGuard apart:**
+- Real-time barcode scanning + AI insights
+- Custom goal setting (weight loss, gain, maintenance)
+- Adaptive suggestions based on health data
+- User-controlled warning system (sugar/sodium alerts)
 
----
-
-## 🏗️ Architecture & Technology Stack
-
-| Layer              | Technology / Library                                  |
-|-------------------|--------------------------------------------------------|
-| Framework          | [Expo](https://expo.dev/) (React Native)              |
-| Navigation         | React Navigation (Stack Navigator)                    |
-| API Integration    | [Open Food Facts API](https://world.openfoodfacts.org/api/v0/product/{barcode}.json) |
-| Data Storage       | AsyncStorage (for user preferences)                   |
-| UI Components      | React Native core + `@expo/vector-icons`, SVG         |
-| Version Control    | Git (hosted on [GitHub](https://github.com/CroNusCoder/NutriGuard)) |
+**Vision**:  
+A future where every food choice is **informed**, **personalized**, and **goal-driven**, powered by transparent nutrition data and smart recommendations.
 
 ---
 
-## ✨ Key Features
+## 🔑 Upcoming Core Features
 
-### 🔹 Welcome Screen
-- Entry point with custom SVG graphics.
-- Motivational message: **"Know What You Eat!!"**
-- Two buttons: **Scan Now!** and ⚙️ **Settings**
-- Fully accessible and responsive.
-
-### 🔹 Scanner Screen
-- Uses device camera to scan barcodes.
-- Passes scanned data to NutritionScreen.
-
-### 🔹 Nutrition Screen
-- Fetches nutrition data from Open Food Facts API.
-- Displays: calories, sugar, sodium, protein, fiber, trans fat, saturated fat.
-- Normalizes values to per-serving size.
-- Highlights high sugar (>10g/100g) or sodium (based on user settings).
-- Displays warning/suggestions.
-- Built-in accessibility and mobile responsiveness.
-
-### 🔹 Settings Screen
-- Toggle warning preferences: **High Sugar** & **High Sodium**
-- Persists preferences via `AsyncStorage`
-- Custom checkbox UI with color indicators
-- Save confirmation via alert
-
-### 🔹 Privacy Policy
-- Scrollable document outlining app's handling of camera, storage, and data.
-- Accessible with future plans to host it online.
+| Feature                          | Description                                                                 |
+|----------------------------------|-----------------------------------------------------------------------------|
+| 🔍 Barcode Scanner               | Scan food barcodes to fetch accurate nutritional facts                      |
+| 👤 Health Profile Input          | User inputs age, weight, height, activity level, and dietary goal           |
+| 🤖 AI Food Guidance System       | AI gives advice on whether to consume, avoid, or swap scanned items         |
+| 📈 Goal Tracking                 | Monitor daily intake toward user’s fitness objective                        |
+| ⚠️ Custom Warning System         | Set thresholds for sugar, sodium, and allergens                             |
+| 📊 Food History & Analytics      | View past scans, trends, and diet breakdown                                 |
+| 🛡️ Privacy-Focused               | No user tracking; only minimal local data stored                            |
 
 ---
 
-## 🧪 Development Process & Challenges
+## 🏗️ Tech Stack
 
-| Task / Feature            | Notes                                                                 |
-|--------------------------|-----------------------------------------------------------------------|
-| Nutrition normalization   | Handled serving size mismatch using per-100g API data                |
-| API reliability           | Safeguarded against missing data fields (fallbacks like `"N/A"`)     |
-| UI/UX polish              | Added responsive styling, contrast, and screen reader support         |
-| Git issues                | Resolved push rejections via `git pull`                              |
-
----
-
-## 🚦 Current Status
-
-| Area                 | Status                          |
-|----------------------|----------------------------------|
-| Barcode → Nutrition  | ✅ Working with live API         |
-| Settings Persistence | ✅ Functional with AsyncStorage |
-| UI Polish            | ✅ ScrollView, custom components |
-| Accessibility        | ✅ Implemented                   |
-| Store Ready?         | ⚠️ Not yet (see below)           |
-
-### ⚠️ To Do Before Public Release
-- Add app icon and splash screen
-- Connect warning toggles to `NutritionScreen` dynamically
-- Host privacy policy online
-- Configure `app.json` for builds
-- Cross-device testing
+- **Framework**: React Native (Expo)
+- **Backend/API**: Open Food Facts API
+- **Storage**: AsyncStorage for user settings (will be expanded to cloud storage)
+- **AI Integration**: (Planned) Groq or Gemini for food suggestion logic
+- **Navigation**: React Navigation (Stack)
+- **Version Control**: GitHub → [github.com/CroNusCoder/NutriGuard](https://github.com/CroNusCoder/NutriGuard)
 
 ---
 
-## 🚀 Future Enhancements
+## 🚀 Status
 
-- 🔄 Integrate user preferences with `NutritionScreen`
-- 📊 Add scan history and dietary trend tracking
-- 🎨 Support dark mode & high-contrast themes
-- 🧠 Personalized food suggestions based on goals
-- 🔧 Refactor for performance with `react-native-reanimated`
-- 🌐 Multi-language support
-
----
-
-## 🛠️ How to Contribute / Help
-
-**Ways you can help:**
-- Suggest better nutrition warnings or threshold logic
-- Review code for performance or accessibility improvements
-- Help connect Firestore for saving scan history
-- Guide Expo build + Play Store/App Store submission
-- Star ⭐ the repo on GitHub: [CroNusCoder/NutriGuard](https://github.com/CroNusCoder/NutriGuard)
+- [x] Core UI (Scanner, Nutrition Info, Settings)
+- [x] API integration (Open Food Facts)
+- [x] Local warning system
+- [ ] User login and health profile input (coming)
+- [ ] AI recommendation engine (coming)
+- [ ] Goal-based analysis and progress tracking
 
 ---
 
-## 📸 Screenshots (Coming Soon)
+## 💡 Next Steps
 
-_Add screenshots of WelcomeScreen, ScannerScreen, NutritionScreen, and SettingsScreen here._
+- Integrate user login & profile setup screen
+- Build a recommendation engine using LLMs (Groq, Gemini, etc.)
+- Map scanned food items to user’s goals (flag excesses, suggest better)
+- Add food history & charts with calorie/macronutrient insights
+
+---
+
+## 🛠️ Contributions Welcome
+
+- Suggest data models for user health input
+- Propose better logic for AI suggestions
+- Help with Groq/LLM prompt engineering
+- UI/UX feedback always appreciated
 
 ---
 
@@ -126,4 +82,4 @@ MIT © 2025 [CroNusCoder](https://github.com/CroNusCoder)
 
 ---
 
-_This project was built with ❤️ to promote mindful eating and health awareness using the power of open data and mobile technology._
+_“Let food be thy medicine, and NutriGuard be your guide.”_
