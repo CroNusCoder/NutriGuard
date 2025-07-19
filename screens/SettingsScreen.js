@@ -1,37 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {
   const [warnSugar, setWarnSugar] = useState(true);
   const [warnSodium, setWarnSodium] = useState(false);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const sugar = await AsyncStorage.getItem('warnSugar');
-        const sodium = await AsyncStorage.getItem('warnSodium');
-        if (sugar !== null) setWarnSugar(sugar === 'true');
-        if (sodium !== null) setWarnSodium(sodium === 'true');
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      }
-    };
-    loadSettings();
-  }, []);
-
   const toggleSugar = () => setWarnSugar(prev => !prev);
   const toggleSodium = () => setWarnSodium(prev => !prev);
 
-  const onSave = async () => {
-    try {
-      await AsyncStorage.setItem('warnSugar', warnSugar.toString());
-      await AsyncStorage.setItem('warnSodium', warnSodium.toString());
-      Alert.alert('Settings Saved', `Warn on High Sugar: ${warnSugar ? 'Yes' : 'No'}\nWarn on High Sodium: ${warnSodium ? 'Yes' : 'No'}`);
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      Alert.alert('Error', 'Failed to save settings. Please try again.');
-    }
+  const onSave = () => {
+    // For now, just show the alert
+    Alert.alert('Settings Saved (Local Only)', `Warn on High Sugar: ${warnSugar ? 'Yes' : 'No'}\nWarn on High Sodium: ${warnSodium ? 'Yes' : 'No'}`);
   };
 
   return (

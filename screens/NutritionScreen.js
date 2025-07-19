@@ -22,67 +22,71 @@ export default function NutritionScreen({ route, navigation }) {
           if (servingSize.includes('g')) servingSizeGrams = parseFloat(servingSize);
 
           let calories = 'N/A kcal';
+          let caloriesNum = 0;
           if (nutriments.energy_value) {
             const energyValue = parseFloat(nutriments.energy_value);
             const energyUnit = nutriments.energy_value_unit || 'kJ';
             if (energyUnit.toLowerCase() === 'kj') {
-              calories = `${(energyValue * 0.239).toFixed(0)} kcal`;
+              caloriesNum = parseFloat((energyValue * 0.239).toFixed(0));
+              calories = `${caloriesNum} kcal`;
             } else if (energyUnit.toLowerCase() === 'kcal') {
-              calories = `${energyValue} kcal`;
+              caloriesNum = energyValue;
+              calories = `${caloriesNum} kcal`;
             }
             if (servingSizeGrams !== 100 && nutriments.energy_value_unit === undefined) {
-              calories = `${((energyValue * servingSizeGrams) / 100).toFixed(0)} kcal`;
+              caloriesNum = parseFloat(((energyValue * servingSizeGrams) / 100).toFixed(0));
+              calories = `${caloriesNum} kcal`;
             }
           }
 
-          const normalizeValue = (value, unit) => {
+          const normalizeValue = (value) => {
             if (value && !isNaN(parseFloat(value))) {
               const baseValue = parseFloat(value);
               if (servingSizeGrams !== 100) {
-                return `${((baseValue * servingSizeGrams) / 100).toFixed(1)}${unit}`;
+                return parseFloat(((baseValue * servingSizeGrams) / 100).toFixed(1));
               }
-              return `${baseValue}${unit}`;
+              return parseFloat(baseValue.toFixed(1));
             }
-            return `N/A ${unit}`;
+            return 0;
           };
 
-          const sugar = normalizeValue(nutriments.sugars, 'g');
-          const sodium = normalizeValue(nutriments.sodium, 'g');
-          const fiber = normalizeValue(nutriments.fiber, 'g');
-          const protein = normalizeValue(nutriments.proteins, 'g');
-          const transFat = normalizeValue(nutriments['trans-fat'], 'g');
-          const saturatedFat = normalizeValue(nutriments['saturated-fat'], 'g');
+          const sugar = normalizeValue(nutriments.sugars);
+          const sodium = normalizeValue(nutriments.sodium);
+          const fiber = normalizeValue(nutriments.fiber);
+          const protein = normalizeValue(nutriments.proteins);
+          const transFat = normalizeValue(nutriments['trans-fat']);
+          const saturatedFat = normalizeValue(nutriments['saturated-fat']);
+          const carbs = normalizeValue(nutriments.carbohydrates);
 
-          const sugarValue = parseFloat(sugar) || 0;
-          const inconsistencyNote = sugarValue > servingSizeGrams ? ' (Note: Sugar may be per 100g)' : '';
+          const inconsistencyNote = sugar > servingSizeGrams ? ' (Note: Sugar may be per 100g)' : '';
 
           setNutrition({
             name: product.product_name || 'Unknown Food',
-            servingSize: servingSize,
-            calories: calories,
-            sugar: `${sugar}${inconsistencyNote}`,
-            sodium: sodium,
-            fiber: fiber,
-            protein: protein,
-            transFat: transFat,
-            saturatedFat: saturatedFat,
+            servingSize,
+            calories,
+            sugar: `${sugar}g${inconsistencyNote}`,
+            sodium: `${sodium}g`,
+            fiber: `${fiber}g`,
+            protein: `${protein}g`,
+            transFat: `${transFat}g`,
+            saturatedFat: `${saturatedFat}g`,
+            carbs: `${carbs}g`,
+            caloriesNum,
+            macros: {
+              calories: caloriesNum,
+              sugar,
+              protein,
+              fat: saturatedFat,
+              carbs,
+              fiber,
+              sodium
+            },
             warning: nutriments.sugars_content > 10 ? 'High Sugar' : '',
             suggestion: nutriments.sugars_content > 10 ? 'Try oats with no added sugar' : '',
           });
         } else {
-          setNutrition({
-            name: 'No Data Found',
-            servingSize: 'N/A',
-            calories: 'N/A kcal',
-            sugar: 'N/A g',
-            sodium: 'N/A g',
-            fiber: 'N/A g',
-            protein: 'N/A g',
-            transFat: 'N/A g',
-            saturatedFat: 'N/A g',
-            warning: '',
-            suggestion: '',
-          });
+          setNutrition(null);
+          setError("No nutritional data found.");
         }
       } catch (err) {
         setError('Failed to fetch nutrition data');
@@ -97,16 +101,16 @@ export default function NutritionScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="tomato" accessibilityLabel="Loading Nutrition Data" />
+        <ActivityIndicator size="large" color="tomato" />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
-  if (error) {
+  if (error || !nutrition) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>{error || "No data available"}</Text>
         <Button title="Back to Scanner" onPress={() => navigation.navigate('Scanner')} color="tomato" />
       </View>
     );
@@ -114,7 +118,7 @@ export default function NutritionScreen({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title} accessibilityRole="header">{nutrition.name}</Text>
+      <Text style={styles.title}>{nutrition.name}</Text>
       <Text style={styles.servingText}>Serving Size: {nutrition.servingSize}</Text>
       <Text style={styles.barcodeText}>Barcode: {barcodeData}</Text>
 
@@ -155,30 +159,38 @@ export default function NutritionScreen({ route, navigation }) {
 
       {nutrition.warning && (
         <View style={styles.warningBox}>
-          <Text style={styles.warningText} accessibilityRole="alert">{nutrition.warning}</Text>
+          <Text style={styles.warningText}>{nutrition.warning}</Text>
         </View>
       )}
 
       {nutrition.suggestion && (
         <Text style={styles.suggestion}>{nutrition.suggestion}</Text>
       )}
+
       <Button
-        title="Back to Scanner"
-        onPress={() => navigation.navigate('Scanner')}
-        color="tomato"
-        accessibilityLabel="Back to Scanner Button"
+        title="Analyze with AI"
+        onPress={() => navigation.navigate('AiAnalysis', {
+          macros: nutrition.macros,
+          foodName: nutrition.name,
+          source: 'barcode'
+        })}
+        color="#2A473A"
       />
+
+      <View style={{ marginTop: 10 }}>
+        <Button
+          title="Back to Scanner"
+          onPress={() => navigation.navigate('Scanner')}
+          color="tomato"
+        />
+      </View>
     </ScrollView>
   );
 }
 
 const windowWidth = Dimensions.get('window').width - 40;
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginHorizontal: 20,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, marginHorizontal: 20, backgroundColor: '#fff' },
   content: {
     paddingTop: 50,
     paddingBottom: 20,
@@ -187,29 +199,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderColor: '#333',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  servingText: {
-    fontSize: 14,
-    marginBottom: 10,
-    color: '#777',
-    textAlign: 'center',
-  },
-  barcodeText: {
-    fontSize: 14,
-    marginBottom: 20,
-    color: '#777',
-    textAlign: 'center',
-  },
-  dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
+  title: { fontSize: 28, fontWeight: '600', marginBottom: 5, textAlign: 'center' },
+  servingText: { fontSize: 14, marginBottom: 10, color: '#777', textAlign: 'center' },
+  barcodeText: { fontSize: 14, marginBottom: 20, color: '#777', textAlign: 'center' },
+  dataRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
   dataBox: {
     borderRadius: 10,
     paddingVertical: 10,
@@ -217,17 +210,8 @@ const styles = StyleSheet.create({
     minWidth: windowWidth / 3 - 20,
     marginBottom: 5,
   },
-  dataLabel: {
-    fontSize: 14,
-    marginBottom: 4,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  dataValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
+  dataLabel: { fontSize: 14, marginBottom: 4, fontWeight: '500', textAlign: 'center' },
+  dataValue: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
   calories: { backgroundColor: '#b6d7a8', borderColor: '#6aa84f', borderWidth: 1 },
   sugar: { backgroundColor: '#fff2cc', borderColor: '#b8860b', borderWidth: 1 },
   protein: { backgroundColor: '#c9daf8', borderColor: '#4a90e2', borderWidth: 1 },
@@ -243,11 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     alignItems: 'center',
   },
-  warningText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 18,
-  },
+  warningText: { color: '#fff', fontWeight: '700', fontSize: 18 },
   suggestion: {
     fontSize: 16,
     color: '#357ABD',
@@ -255,22 +235,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#e25822',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 20 },
+  loadingText: { marginTop: 10, fontSize: 16, color: '#666' },
+  errorText: { fontSize: 18, color: '#e25822', textAlign: 'center', marginBottom: 20 },
 });
